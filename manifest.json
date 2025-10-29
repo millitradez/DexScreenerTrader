@@ -2,16 +2,18 @@
   "manifest_version": 3,
   "name": "DexScreener Trader",
   "version": "1.0.0",
-  "description": "Trade directly on Dexscreener with embedded tools.",
-  "permissions": ["activeTab", "scripting", "storage"],
+  "description": "Trade directly from Dexscreener with enhanced tools.",
   "action": {
     "default_popup": "index.html",
-    "default_icon": "icon.png"
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   },
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": ["https://dexscreener.com/*"],
   "background": {
-    "service_worker": "main.js"
-  },
-  "icons": {
-    "48": "icon.png"
+    "service_worker": "index.js"
   }
 }
