@@ -1,35 +1,39 @@
 workflows:
-  safari_extension_ios:
-    name: Dexscreener Trader iOS Build
+  ios-extension-build:
+    name: DexScreenerTrader iOS Build
     environment:
       vars:
-        XCODE_PROJECT: "DexscreenerTrader.xcodeproj"
-        XCODE_SCHEME: "DexscreenerTrader"
+        XCODE_WORKSPACE: "DexScreenerTrader.xcodeproj"
+        XCODE_SCHEME: "DexScreenerTrader"
+        BUNDLE_ID: "com.millitradez.DexScreenerTrader"
+        APPLE_ID: "Tradezconsulting@icloud.com"
       xcode: latest
-      cocoapods: default
+      ios_signing:
+        distribution_type: ad_hoc
+        bundle_identifier: "com.millitradez.DexScreenerTrader"
+
     scripts:
       - name: Install dependencies
         script: |
           echo "Installing dependencies..."
-          if [ -f "package.json" ]; then
-            npm install
-          fi
-          if [ -f "Podfile" ]; then
-            pod install
-          fi
+          npm install || yarn install
       - name: Build Safari Web Extension for iOS
         script: |
-          echo "Building Safari Web Extension..."
-          xcodebuild \
-            -project "$XCODE_PROJECT" \
+          echo "Building Safari web extension..."
+          xcodebuild -project "$XCODE_WORKSPACE" \
             -scheme "$XCODE_SCHEME" \
             -configuration Release \
-            -destination 'generic/platform=iOS' \
-            clean build CODE_SIGNING_ALLOWED=NO
+            -sdk iphoneos \
+            -archivePath "$PWD/build/DexScreenerTrader.xcarchive" archive
+      - name: Export IPA
+        script: |
+          echo "Exporting IPA..."
+          xcodebuild -exportArchive \
+            -archivePath "$PWD/build/DexScreenerTrader.xcarchive" \
+            -exportOptionsPlist exportOptions.plist \
+            -exportPath "$PWD/build"
+
     artifacts:
-      - build/Release-iphoneos/**/*.ipa
-      - build/Release-iphoneos/**/*.app
-    publishing:
-      email:
-        recipients:
-          - millitradez@gmail.com
+      - build/*.ipa
+      - build/**/*.dSYM.zip
+      - build/**/*.log
