@@ -1,39 +1,4 @@
-workflows:
-  ios-extension-build:
-    name: DexScreenerTrader iOS Build
-    environment:
-      vars:
-        XCODE_WORKSPACE: "DexScreenerTrader.xcodeproj"
-        XCODE_SCHEME: "DexScreenerTrader"
-        BUNDLE_ID: "com.millitradez.DexScreenerTrader"
-        APPLE_ID: "Tradezconsulting@icloud.com"
-      xcode: latest
-      ios_signing:
-        distribution_type: ad_hoc
-        bundle_identifier: "com.millitradez.DexScreenerTrader"
-
-    scripts:
-      - name: Install dependencies
-        script: |
-          echo "Installing dependencies..."
-          npm install || yarn install
-      - name: Build Safari Web Extension for iOS
-        script: |
-          echo "Building Safari web extension..."
-          xcodebuild -project "$XCODE_WORKSPACE" \
-            -scheme "$XCODE_SCHEME" \
-            -configuration Release \
-            -sdk iphoneos \
-            -archivePath "$PWD/build/DexScreenerTrader.xcarchive" archive
-      - name: Export IPA
-        script: |
-          echo "Exporting IPA..."
-          xcodebuild -exportArchive \
-            -archivePath "$PWD/build/DexScreenerTrader.xcarchive" \
-            -exportOptionsPlist exportOptions.plist \
-            -exportPath "$PWD/build"
-
-    artifacts:
-      - build/*.ipa
-      - build/**/*.dSYM.zip
-      - build/**/*.log
+notify:
+  recipients:
+    - Tradezconsulting@icloud.com
+    - other_existing_recipient@example.com  # Keep existing recipients
