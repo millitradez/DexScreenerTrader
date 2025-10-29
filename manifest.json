@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "DexScreener Trader",
+  "version": "1.0.0",
+  "description": "Trade directly on Dexscreener with embedded tools.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": "icon.png"
+  },
+  "background": {
+    "service_worker": "main.js"
+  },
+  "icons": {
+    "48": "icon.png"
+  }
+}
