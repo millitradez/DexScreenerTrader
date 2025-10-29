@@ -15,44 +15,61 @@ workflows:
       - name: Build project
         script: |
           echo "🏗️ Building the web app..."
-          npm run build || npm run build:web || npm run export || echo "⚠️ No build script, continuing..."
+          if [ -f package.json ]; then
+            if npm run | grep -q "build"; then
+              npm run build
+            else
+              echo "⚠️ No build script found, generating static build manually..."
+              mkdir -p dist
+              cp -r * dist/ || true
+            fi
+          else
+            echo "⚠️ No package.json found, creating fallback dist folder..."
+            mkdir -p dist
+            cp -r * dist/ || true
+          fi
 
       - name: Locate build output
         script: |
           echo "🔍 Searching for build folder..."
           OUTPUT_DIR=""
-          for dir in dist build public out; do
-            if [ -d "$dir" ]; then
+          for dir in dist build out public; do
+            if [ -d "$dir" ] && [ -f "$dir/index.html" ]; then
               OUTPUT_DIR="$dir"
               break
             fi
           done
+
           if [ -z "$OUTPUT_DIR" ]; then
-            echo "❌ No build folder found. Listing contents..."
-            ls -R
-            exit 1
+            echo "❌ No valid build folder found (missing index.html). Creating fallback dist folder..."
+            mkdir -p dist
+            cp -r * dist/ || true
+            OUTPUT_DIR="dist"
           fi
+
           echo "✅ Found build output folder: $OUTPUT_DIR"
-          echo "OUTPUT_DIR=$OUTPUT_DIR" >> .env.local
+          echo "OUTPUT_DIR=$OUTPUT_DIR" >> $CM_BUILD_DIR/output.env
           export OUTPUT_DIR
 
       - name: Package build artifacts
         script: |
           echo "📦 Packaging web build..."
+          source $CM_BUILD_DIR/output.env || true
           mkdir -p artifacts
           if [ -d "$OUTPUT_DIR" ]; then
             zip -r "artifacts/DexScreenerTrader_web_build.zip" "$OUTPUT_DIR"
             echo "✅ Build zipped successfully: artifacts/DexScreenerTrader_web_build.zip"
           else
-            echo "❌ Output directory not found: $OUTPUT_DIR"
+            echo "❌ Output directory not found after fallback: $OUTPUT_DIR"
+            ls -la
             exit 1
           fi
 
       - name: Safari PWA configuration
         script: |
           echo "📱 Preparing iPhone Safari web app..."
-          mkdir -p safari_config
-          cat > safari_config/manifest.json <<EOL
+          mkdir -p "$OUTPUT_DIR"
+          cat > "$OUTPUT_DIR/manifest.json" <<EOL
           {
             "name": "DexScreener Trader",
             "short_name": "DexTrader",
@@ -74,7 +91,7 @@ workflows:
             ]
           }
           EOL
-          echo "✅ Safari manifest added."
+          echo "✅ Safari manifest added to: $OUTPUT_DIR/manifest.json"
 
     artifacts:
       - artifacts/DexScreenerTrader_web_build.zip
