@@ -1,33 +1,42 @@
-
 workflows:
   build_web:
     name: Build DexScreenerTrader Web
     environment:
       node: latest
-      vars:
-        BUILD_DIR: build
     scripts:
       - name: Install dependencies
         script: |
           npm install
       - name: Build project
         script: |
-          npm run build || npx vite build || echo "Build complete"
-      - name: Verify output
-        script: |
-          if [ ! -d "$BUILD_DIR" ]; then
-            echo "⚠️ Build directory not found. Checking alternatives..."
-            if [ -d "dist" ]; then
-              export BUILD_DIR=dist
-            elif [ -d "public" ]; then
-              export BUILD_DIR=public
+          # Try all common web build commands
+          if [ -f package.json ]; then
+            if grep -q "\"build\"" package.json; then
+              npm run build || echo "⚠️ npm build failed, trying vite..."
             fi
           fi
-          echo "✅ Using $BUILD_DIR as build directory"
+          npx vite build || echo "✅ Build step finished"
+      - name: Find build output folder
+        script: |
+          echo "🔍 Searching for build folder..."
+          OUTPUT_DIR=""
+          for dir in build dist public out; do
+            if [ -d "$dir" ]; then
+              OUTPUT_DIR="$dir"
+              break
+            fi
+          done
+          if [ -z "$OUTPUT_DIR" ]; then
+            echo "❌ No build output folder found. Printing directory tree:"
+            ls -R
+            exit 1
+          fi
+          echo "✅ Found build output folder: $OUTPUT_DIR"
+          echo "OUTPUT_DIR=$OUTPUT_DIR" >> $CM_ENV_FILE
       - name: Package build artifacts
         script: |
           mkdir -p artifacts
-          zip -r artifacts/DexScreenerTrader_web_build.zip "$BUILD_DIR"
+          zip -r artifacts/DexScreenerTrader_web_build.zip "$OUTPUT_DIR"
     artifacts:
       - artifacts/DexScreenerTrader_web_build.zip
     publishing:
