@@ -1,14 +1,21 @@
 workflows:
-  build_web:
-    name: Build DexScreenerTrader Web
-    instance_type: mac_mini_m2
-    max_build_duration: 30
+  dexscreener_trader_build:
+    name: Dexscreener Trader Extension
     environment:
-      node: latest
+      vars:
+        NODE_VERSION: 18
     scripts:
       - name: Install dependencies
-        script: npm install
+        script: |
+          if [ -f package.json ]; then
+            npm install
+          fi
       - name: Build project
-        script: npm run build
+        script: |
+          echo "Building Safari web extension..."
+          mkdir -p build
+          cp -r index.html manifest.json main.js icon.png build/
+          cd build
+          zip -r ../DexscreenerTrader_Extension.zip .
     artifacts:
-      - build/**/*
+      - DexscreenerTrader_Extension.zip
