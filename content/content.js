@@ -1,0 +1,1 @@
+console.log("✅ Dexscreener content script active.");

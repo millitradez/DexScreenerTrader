@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dexscreener Trader</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      width: 320px;
+      background: #0e1117;
+      color: #fff;
+      text-align: center;
+      padding: 16px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 16px;
+      background: #00c38a;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #00a173;
+    }
+  </style>
+</head>
+<body>
+  <h2>Dexscreener Trader</h2>
+  <p>Trade directly from Dexscreener charts</p>
+  <button id="openDex">Open Dexscreener</button>
+  <script>
+    document.getElementById("openDex").addEventListener("click", () => {
+      chrome.tabs.create({ url: "https://dexscreener.com" });
+    });
+  </script>
+</body>
+</html>

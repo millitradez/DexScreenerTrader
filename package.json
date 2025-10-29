@@ -1,0 +1,1 @@
+{\n  "name": "dexscreener-trader-extension",\n  "version": "1.0.0",\n  "description": "Browser extension for trading Solana tokens via Dexscreener + Jupiter.",\n  "scripts": {\n    "test": "echo 'No build step needed for vanilla JS setup'"\n  }\n}

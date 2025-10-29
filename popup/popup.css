@@ -1,0 +1,1 @@
+body {\n  font-family: system-ui, sans-serif;\n  background: #0f172a;\n  color: #e2e8f0;\n  padding: 12px;\n  width: 300px;\n}\n\nbutton {\n  background: #3b82f6;\n  color: white;\n  border: none;\n  padding: 8px 12px;\n  border-radius: 4px;\n  cursor: pointer;\n}\n\nbutton:hover {\n  background: #2563eb;\n}

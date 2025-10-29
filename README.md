@@ -1,2 +1,1 @@
-# DexScreenerTrader
-Safari web extension for dexscreener trading tools 
+# Dexscreener Trader Extension\n\nA cross-browser WebExtension that lets you view Dexscreener data and trade tokens via the Jupiter API.\n\n---\n\n## 🚀 Develop on Windows\n1. Clone this repo\n2. Open Chrome → Extensions → Developer Mode → **Load unpacked**\n3. Select the project folder\n4. Click the extension icon → “Test Jupiter API” to check connectivity\n\n---\n\n## 🍎 Convert to Safari\nWhen ready:\n1. Move this folder to macOS\n2. Run:\n   ```bash\n   xcrun safari-web-extension-converter .\n   ```
