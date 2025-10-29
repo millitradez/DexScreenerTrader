@@ -1,44 +1,81 @@
 workflows:
-  build_web:
-    name: Build DexScreenerTrader Web
+  build_safari_ios_extension:
+    name: Build DexScreenerTrader Safari iOS Extension
     environment:
+      xcode: latest
       node: latest
+      cocoapods: default
     scripts:
       - name: Install dependencies
         script: |
           npm install
+
       - name: Build project
         script: |
-          # Try all common web build commands
-          if [ -f package.json ]; then
-            if grep -q "\"build\"" package.json; then
-              npm run build || echo "⚠️ npm build failed, trying vite..."
-            fi
+          echo "⚙️ Building Safari web extension..."
+          if grep -q "\"build\"" package.json; then
+            npm run build
+          else
+            npx vite build || echo "⚠️ Tried Vite build fallback"
           fi
-          npx vite build || echo "✅ Build step finished"
-      - name: Find build output folder
+
+      - name: Locate build output
         script: |
           echo "🔍 Searching for build folder..."
           OUTPUT_DIR=""
-          for dir in build dist public out; do
+          for dir in dist build public out; do
             if [ -d "$dir" ]; then
               OUTPUT_DIR="$dir"
               break
             fi
           done
           if [ -z "$OUTPUT_DIR" ]; then
-            echo "❌ No build output folder found. Printing directory tree:"
+            echo "❌ No build folder found. Listing contents..."
             ls -R
             exit 1
           fi
           echo "✅ Found build output folder: $OUTPUT_DIR"
-          echo "OUTPUT_DIR=$OUTPUT_DIR" >> $CM_ENV_FILE
-      - name: Package build artifacts
+          echo "OUTPUT_DIR=$OUTPUT_DIR" >> $CM_ENV_FILE_PATH
+
+      - name: Package web extension
         script: |
+          echo "📦 Zipping web extension..."
           mkdir -p artifacts
-          zip -r artifacts/DexScreenerTrader_web_build.zip "$OUTPUT_DIR"
+          cd "$OUTPUT_DIR"
+          zip -r ../artifacts/DexScreenerTrader_SafariWebExtension.zip .
+          cd ..
+
+      - name: Convert to native Safari iOS extension (.app)
+        script: |
+          echo "🧩 Running Safari Web Extension Converter..."
+          mkdir -p converted
+          xcrun safari-web-extension-converter "$OUTPUT_DIR" \
+            --project-location ./converted \
+            --app-name "DexScreenerTrader" \
+            --bundle-identifier "com.millitradez.dexscreenertrader" \
+            --no-open
+
+          echo "✅ Safari iOS extension project created in ./converted/DexScreenerTrader"
+
+      - name: Build iOS .ipa for Safari extension
+        script: |
+          echo "📱 Building iOS .ipa..."
+          cd converted/DexScreenerTrader
+          xcodebuild -scheme "DexScreenerTrader (iOS)" \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath ../artifacts/DexScreenerTrader.xcarchive archive
+
+          xcodebuild -exportArchive \
+            -archivePath ../artifacts/DexScreenerTrader.xcarchive \
+            -exportPath ../artifacts \
+            -exportOptionsPlist ./ExportOptions.plist || true
+
     artifacts:
-      - artifacts/DexScreenerTrader_web_build.zip
+      - artifacts/*.zip
+      - artifacts/*.ipa
+      - artifacts/*.xcarchive
+
     publishing:
       email:
         recipients:
