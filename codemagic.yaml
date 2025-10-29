@@ -1,23 +1,21 @@
 workflows:
-  build_safari_ios_extension:
-    name: Build DexScreenerTrader Safari iOS Extension
+  web_app_build:
+    name: DexScreenerTrader Web Build (Safari iPhone)
+    max_build_duration: 30
     environment:
-      xcode: latest
       node: latest
-      cocoapods: default
+      vars:
+        BUILD_DIR: dist
     scripts:
       - name: Install dependencies
         script: |
+          echo "📦 Installing dependencies..."
           npm install
 
       - name: Build project
         script: |
-          echo "⚙️ Building Safari web extension..."
-          if grep -q "\"build\"" package.json; then
-            npm run build
-          else
-            npx vite build || echo "⚠️ Tried Vite build fallback"
-          fi
+          echo "🏗️ Building the web app..."
+          npm run build || npm run build:web || npm run export || echo "⚠️ No build script, continuing..."
 
       - name: Locate build output
         script: |
@@ -35,48 +33,56 @@ workflows:
             exit 1
           fi
           echo "✅ Found build output folder: $OUTPUT_DIR"
-          echo "OUTPUT_DIR=$OUTPUT_DIR" >> $CM_ENV_FILE_PATH
+          echo "OUTPUT_DIR=$OUTPUT_DIR" >> .env.local
+          export OUTPUT_DIR
 
-      - name: Package web extension
+      - name: Package build artifacts
         script: |
-          echo "📦 Zipping web extension..."
+          echo "📦 Packaging web build..."
           mkdir -p artifacts
-          cd "$OUTPUT_DIR"
-          zip -r ../artifacts/DexScreenerTrader_SafariWebExtension.zip .
-          cd ..
+          if [ -d "$OUTPUT_DIR" ]; then
+            zip -r "artifacts/DexScreenerTrader_web_build.zip" "$OUTPUT_DIR"
+            echo "✅ Build zipped successfully: artifacts/DexScreenerTrader_web_build.zip"
+          else
+            echo "❌ Output directory not found: $OUTPUT_DIR"
+            exit 1
+          fi
 
-      - name: Convert to native Safari iOS extension (.app)
+      - name: Safari PWA configuration
         script: |
-          echo "🧩 Running Safari Web Extension Converter..."
-          mkdir -p converted
-          xcrun safari-web-extension-converter "$OUTPUT_DIR" \
-            --project-location ./converted \
-            --app-name "DexScreenerTrader" \
-            --bundle-identifier "com.millitradez.dexscreenertrader" \
-            --no-open
-
-          echo "✅ Safari iOS extension project created in ./converted/DexScreenerTrader"
-
-      - name: Build iOS .ipa for Safari extension
-        script: |
-          echo "📱 Building iOS .ipa..."
-          cd converted/DexScreenerTrader
-          xcodebuild -scheme "DexScreenerTrader (iOS)" \
-            -configuration Release \
-            -sdk iphoneos \
-            -archivePath ../artifacts/DexScreenerTrader.xcarchive archive
-
-          xcodebuild -exportArchive \
-            -archivePath ../artifacts/DexScreenerTrader.xcarchive \
-            -exportPath ../artifacts \
-            -exportOptionsPlist ./ExportOptions.plist || true
+          echo "📱 Preparing iPhone Safari web app..."
+          mkdir -p safari_config
+          cat > safari_config/manifest.json <<EOL
+          {
+            "name": "DexScreener Trader",
+            "short_name": "DexTrader",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#000000",
+            "theme_color": "#0D1117",
+            "icons": [
+              {
+                "src": "icon-192.png",
+                "sizes": "192x192",
+                "type": "image/png"
+              },
+              {
+                "src": "icon-512.png",
+                "sizes": "512x512",
+                "type": "image/png"
+              }
+            ]
+          }
+          EOL
+          echo "✅ Safari manifest added."
 
     artifacts:
-      - artifacts/*.zip
-      - artifacts/*.ipa
-      - artifacts/*.xcarchive
+      - artifacts/DexScreenerTrader_web_build.zip
 
     publishing:
       email:
         recipients:
-          - tradezconsulting@icloud.com
+          - your@email.com
+        notify:
+          success: true
+          failure: true
