@@ -1,0 +1,13 @@
+{
+  "name": "dexscreenertrader",
+  "version": "1.0.0",
+  "description": "DexScreener trader web extension build",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
