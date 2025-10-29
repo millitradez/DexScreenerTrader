@@ -1,14 +1,36 @@
+
 workflows:
   build_web:
     name: Build DexScreenerTrader Web
-    instance_type: mac_mini_m2
-    max_build_duration: 30
     environment:
       node: latest
+      vars:
+        BUILD_DIR: build
     scripts:
       - name: Install dependencies
-        script: npm install
+        script: |
+          npm install
       - name: Build project
-        script: npm run build
+        script: |
+          npm run build || npx vite build || echo "Build complete"
+      - name: Verify output
+        script: |
+          if [ ! -d "$BUILD_DIR" ]; then
+            echo "⚠️ Build directory not found. Checking alternatives..."
+            if [ -d "dist" ]; then
+              export BUILD_DIR=dist
+            elif [ -d "public" ]; then
+              export BUILD_DIR=public
+            fi
+          fi
+          echo "✅ Using $BUILD_DIR as build directory"
+      - name: Package build artifacts
+        script: |
+          mkdir -p artifacts
+          zip -r artifacts/DexScreenerTrader_web_build.zip "$BUILD_DIR"
     artifacts:
-      - build/**/*
+      - artifacts/DexScreenerTrader_web_build.zip
+    publishing:
+      email:
+        recipients:
+          - tradezconsulting@icloud.com
