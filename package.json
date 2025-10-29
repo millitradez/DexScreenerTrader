@@ -1,13 +1,14 @@
 {
   "name": "dexscreenertrader",
   "version": "1.0.0",
-  "description": "DexScreener trader web extension build",
+  "description": "Safari web extension for Dexscreener trading tools",
+  "main": "index.js",
   "scripts": {
     "start": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "dev": "vite"
   },
-  "dependencies": {},
-  "devDependencies": {
+  "dependencies": {
     "vite": "^5.0.0"
   }
 }
