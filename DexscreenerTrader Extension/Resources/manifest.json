@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+  "name": "Dexscreener Trader Extension",
+  "version": "1.0.0",
+  "description": "Trade directly on Dexscreener using this Safari extension.",
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "icon128.png"
+    }
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://dexscreener.com/*"],
+      "js": ["script.js"]
+    }
+  ],
+  "permissions": ["activeTab", "storage"],
+  "icons": {
+    "128": "icon128.png"
+  }
+}

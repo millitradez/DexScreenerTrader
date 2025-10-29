@@ -1,13 +1,27 @@
 workflows:
-  safari_extension_ios:
-    name: Dexscreener Trader iOS Build
+  ios-safari-extension-debug:
+    name: Dexscreener Trader iOS Build (Debug)
+    max_build_duration: 60
+    instance_type: mac_mini_m1
     environment:
+      ios_signing:
+        distribution_type: development
+        bundle_identifier: com.millitradez.dexscreenertrader
       vars:
         XCODE_PROJECT: "DexscreenerTrader.xcodeproj"
         XCODE_SCHEME: "DexscreenerTrader"
+        APP_STORE_CONNECT_ISSUER_ID: Encrypted(...)
+        APP_STORE_CONNECT_KEY_IDENTIFIER: Encrypted(...)
+        APP_STORE_CONNECT_PRIVATE_KEY: Encrypted(...)
+        CERTIFICATE_PRIVATE_KEY: Encrypted(...)
+        APPLE_ID: tradezconsulting@icloud.com
       xcode: latest
       cocoapods: default
     scripts:
+      - name: Set up provisioning profiles
+        script: |
+          echo "Setting up code signing..."
+          # Automatic code signing will be handled by Codemagic
       - name: Install dependencies
         script: |
           echo "Installing dependencies..."
@@ -17,19 +31,93 @@ workflows:
           if [ -f "Podfile" ]; then
             pod install
           fi
-      - name: Build Safari Web Extension for iOS
+      - name: Build Safari Web Extension for iOS (Debug)
         script: |
-          echo "Building Safari Web Extension..."
-          xcodebuild \
+          echo "Building Safari Web Extension for iOS (Debug)..."
+          xcodebuild clean archive \
             -project "$XCODE_PROJECT" \
             -scheme "$XCODE_SCHEME" \
-            -configuration Release \
-            -destination 'generic/platform=iOS' \
-            clean build CODE_SIGNING_ALLOWED=NO
+            -configuration Debug \
+            -archivePath $CM_BUILD_DIR/build/DexscreenerTrader.xcarchive
+      - name: Export IPA (Debug)
+        script: |
+          echo "Exporting IPA for Debug..."
+          xcodebuild -exportArchive \
+            -archivePath $CM_BUILD_DIR/build/DexscreenerTrader.xcarchive \
+            -exportPath $CM_BUILD_DIR/build/debug-ipa \
+            -exportOptionsPlist $CM_BUILD_DIR/ExportOptionsDebug.plist
     artifacts:
-      - build/Release-iphoneos/**/*.ipa
-      - build/Release-iphoneos/**/*.app
+      - build/debug-ipa/*.ipa
+      - build/DexscreenerTrader.xcarchive
     publishing:
       email:
         recipients:
+          - tradezconsulting@icloud.com
           - millitradez@gmail.com
+        notify:
+          success: true
+          failure: true
+
+  ios-safari-extension-release:
+    name: Dexscreener Trader iOS Build (Release)
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.millitradez.dexscreenertrader
+      vars:
+        XCODE_PROJECT: "DexscreenerTrader.xcodeproj"
+        XCODE_SCHEME: "DexscreenerTrader"
+        APP_STORE_CONNECT_ISSUER_ID: Encrypted(...)
+        APP_STORE_CONNECT_KEY_IDENTIFIER: Encrypted(...)
+        APP_STORE_CONNECT_PRIVATE_KEY: Encrypted(...)
+        CERTIFICATE_PRIVATE_KEY: Encrypted(...)
+        APPLE_ID: tradezconsulting@icloud.com
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Set up provisioning profiles
+        script: |
+          echo "Setting up code signing..."
+          # Automatic code signing will be handled by Codemagic
+      - name: Install dependencies
+        script: |
+          echo "Installing dependencies..."
+          if [ -f "package.json" ]; then
+            npm install
+          fi
+          if [ -f "Podfile" ]; then
+            pod install
+          fi
+      - name: Build Safari Web Extension for iOS (Release)
+        script: |
+          echo "Building Safari Web Extension for iOS (Release)..."
+          xcodebuild clean archive \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -archivePath $CM_BUILD_DIR/build/DexscreenerTrader.xcarchive
+      - name: Export IPA (Release)
+        script: |
+          echo "Exporting IPA for Release..."
+          xcodebuild -exportArchive \
+            -archivePath $CM_BUILD_DIR/build/DexscreenerTrader.xcarchive \
+            -exportPath $CM_BUILD_DIR/build/release-ipa \
+            -exportOptionsPlist $CM_BUILD_DIR/ExportOptionsRelease.plist
+    artifacts:
+      - build/release-ipa/*.ipa
+      - build/DexscreenerTrader.xcarchive
+    publishing:
+      email:
+        recipients:
+          - tradezconsulting@icloud.com
+          - millitradez@gmail.com
+        notify:
+          success: true
+          failure: true
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
