@@ -1,4 +1,11 @@
-notify:
-  recipients:
-    - Tradezconsulting@icloud.com
-    - other_existing_recipient@example.com  # Keep existing recipients
+workflows:
+  build:
+    name: DexScreenerTrader build
+    max_build_duration: 60
+    environment:
+      node: 18.16.0
+    scripts:
+      - npm install
+      - npm run build
+    artifacts:
+      - build/**
