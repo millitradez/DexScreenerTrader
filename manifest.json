@@ -1,56 +1,34 @@
 {
   "manifest_version": 3,
   "name": "DexScreenerTrader",
-  "version": "4.6",
-  "description": "DexScreenerTrader v4.6 — Trade directly from DexScreener with integrated Solana and FluxBeam support (Mainnet Beta).",
+  "version": "4.5",
+  "description": "DexScreenerTrader v4.5 — Embedded Solana wallet and FluxBeam trading integration.",
   "action": {
     "default_popup": "popup.html",
-    "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
-    }
+    "default_title": "DexScreenerTrader"
   },
+  "permissions": [
+    "storage",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://api.mainnet-beta.solana.com/*",
+    "https://api.fluxbeam.xyz/*",
+    "https://public-api.fluxbeam.xyz/*"
+  ],
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "permissions": [
-    "storage",
-    "activeTab",
-    "scripting"
-  ],
-  "host_permissions": [
-    "https://api.mainnet-beta.solana.com/*",
-    "https://public-api.fluxbeam.xyz/*",
-    "https://api.fluxbeam.xyz/*",
-    "https://dexscreener.com/*"
-  ],
-  "background": {
-    "service_worker": "background.js",
-    "type": "module"
-  },
-  "content_scripts": [
-    {
-      "matches": ["https://dexscreener.com/*"],
-      "js": ["content.js"]
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "libs/web3.js",
-        "icons/icon48.png"
-      ],
-      "matches": ["<all_urls>"]
-    }
-  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
   },
-  "options_ui": {
-    "page": "options.html",
-    "open_in_tab": true
-  }
+  "web_accessible_resources": [
+    {
+      "resources": ["libs/web3.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
