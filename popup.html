@@ -1,1 +1,71 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>DexScreenerTrader v4.4</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- solana web3 from CDN for convenience -->
+  <script src="https://unpkg.com/@solana/web3.js@1.87.0/lib/index.iife.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h2>DexScreener Trader (v4.4)</h2>
 
+    <section id="wallet-section">
+      <h3>Wallet</h3>
+      <div id="wallet-controls">
+        <button id="createWalletBtn">🪙 Create Wallet</button>
+        <button id="importWalletBtn">📥 Import (secret key)</button>
+      </div>
+
+      <div id="unlock" style="margin-top:10px;">
+        <input id="pw" type="password" placeholder="Password to unlock / decrypt" />
+        <button id="unlockBtn">Unlock</button>
+      </div>
+
+      <div id="walletInfo" style="display:none">
+        <p><strong>Address:</strong> <span id="pubkey"></span></p>
+        <p><strong>SOL Balance:</strong> <span id="balance">—</span></p>
+        <div class="send-receive">
+          <h4>Send / Receive</h4>
+          <div>
+            <input id="toAddr" placeholder="Recipient address" />
+            <input id="sendAmt" placeholder="Amount (SOL)" />
+            <button id="sendSolBtn">Send SOL</button>
+          </div>
+          <div style="margin-top:6px;">
+            <button id="receiveBtn">Receive (copy addr)</button>
+            <button id="showSeedBtn">Show Seed (decrypt)</button>
+            <button id="lockBtn">Lock Wallet</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="trading-section" style="margin-top:12px;">
+      <h3>Trading / FluxBeam</h3>
+      <input id="inputMint" placeholder="From mint (SOL use So1111...)" />
+      <input id="outputMint" placeholder="To mint (USDC/USDT mint)" />
+      <input id="amount" placeholder="Amount (in token units)" />
+      <div>
+        <button id="quoteBtn">Get Quote</button>
+        <button id="placeOrderBtn">Place Swap</button>
+      </div>
+      <p id="quoteResult"></p>
+      <p id="tradeStatus"></p>
+    </section>
+
+    <section id="advanced" style="margin-top:14px;">
+      <label>RPC Endpoint (Mainnet Beta):</label><br />
+      <input id="rpcInput" value="https://api.mainnet-beta.solana.com" />
+      <button id="saveRpcBtn">Save RPC</button>
+    </section>
+
+    <div id="message" class="message"></div>
+  </div>
+
+  <script src="wallet.js"></script>
+  <script src="fluxbeam.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
