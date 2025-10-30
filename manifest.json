@@ -1,19 +1,24 @@
 {
   "manifest_version": 3,
-  "name": "DexScreener Trader",
-  "version": "1.0.0",
-  "description": "Trade directly from Dexscreener with enhanced tools.",
+  "name": "DexScreenerTrader",
+  "version": "4.4",
+  "description": "DexScreenerTrader v4.4 — embedded wallet, SOL & SPL, FluxBeam trade (Mainnet Beta).",
   "action": {
-    "default_popup": "index.html",
-    "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
-    }
+    "default_popup": "popup.html",
+    "default_title": "DexScreenerTrader"
   },
-  "permissions": ["activeTab", "storage", "scripting"],
-  "host_permissions": ["https://dexscreener.com/*"],
-  "background": {
-    "service_worker": "index.js"
+  "permissions": ["storage", "scripting", "activeTab"],
+  "host_permissions": [
+    "https://api.mainnet-beta.solana.com/*",
+    "https://api.fluxbeam.xyz/*",
+    "https://public-api.fluxbeam.xyz/*"
+  ],
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' https://unpkg.com; object-src 'self'"
   }
 }
