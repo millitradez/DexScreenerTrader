@@ -1,105 +1,76 @@
 workflows:
-  web_app_build:
-    name: DexScreenerTrader Web Build (Safari iPhone)
-    max_build_duration: 30
+  safari_extension_build:
+    name: Dexscreener Trader Safari Extension
+    max_build_duration: 60
     environment:
-      node: latest
+      xcode: latest
       vars:
-        BUILD_DIR: dist
+        APP_NAME: "Dexscreener-trader-extension"
     scripts:
-      - name: Install dependencies
+      - name: Verify manifest and prepare
         script: |
-          echo "📦 Installing dependencies..."
-          npm install
-
-      - name: Build project
-        script: |
-          echo "🏗️ Building the web app..."
-          if [ -f package.json ]; then
-            if npm run | grep -q "build"; then
-              npm run build
-            else
-              echo "⚠️ No build script found, generating static build manually..."
-              mkdir -p dist
-              cp -r * dist/ || true
-            fi
-          else
-            echo "⚠️ No package.json found, creating fallback dist folder..."
-            mkdir -p dist
-            cp -r * dist/ || true
-          fi
-
-      - name: Locate build output
-        script: |
-          echo "🔍 Searching for build folder..."
-          OUTPUT_DIR=""
-          for dir in dist build out public; do
-            if [ -d "$dir" ] && [ -f "$dir/index.html" ]; then
-              OUTPUT_DIR="$dir"
-              break
-            fi
-          done
-
-          if [ -z "$OUTPUT_DIR" ]; then
-            echo "❌ No valid build folder found (missing index.html). Creating fallback dist folder..."
-            mkdir -p dist
-            cp -r * dist/ || true
-            OUTPUT_DIR="dist"
-          fi
-
-          echo "✅ Found build output folder: $OUTPUT_DIR"
-          echo "OUTPUT_DIR=$OUTPUT_DIR" >> $CM_BUILD_DIR/output.env
-          export OUTPUT_DIR
-
-      - name: Package build artifacts
-        script: |
-          echo "📦 Packaging web build..."
-          source $CM_BUILD_DIR/output.env || true
-          mkdir -p artifacts
-          if [ -d "$OUTPUT_DIR" ]; then
-            zip -r "artifacts/DexScreenerTrader_web_build.zip" "$OUTPUT_DIR"
-            echo "✅ Build zipped successfully: artifacts/DexScreenerTrader_web_build.zip"
-          else
-            echo "❌ Output directory not found after fallback: $OUTPUT_DIR"
-            ls -la
+          echo "🧩 Checking manifest.json..."
+          if [ ! -f "manifest.json" ]; then
+            echo "❌ manifest.json not found!"
             exit 1
           fi
+          MANIFEST_VERSION=$(grep '"manifest_version"' manifest.json | grep -o '[0-9]*')
+          echo "Manifest version: $MANIFEST_VERSION"
+          if [ "$MANIFEST_VERSION" -eq 3 ]; then
+            echo "⚠️ Detected manifest v3 — converting to v2 for Safari compatibility..."
+            sed -i '' 's/"manifest_version": 3/"manifest_version": 2/' manifest.json
+          fi
 
-      - name: Safari PWA configuration
+      - name: Convert Chrome extension to Safari
         script: |
-          echo "📱 Preparing iPhone Safari web app..."
-          mkdir -p "$OUTPUT_DIR"
-          cat > "$OUTPUT_DIR/manifest.json" <<EOL
-          {
-            "name": "DexScreener Trader",
-            "short_name": "DexTrader",
-            "start_url": "./index.html",
-            "display": "standalone",
-            "background_color": "#000000",
-            "theme_color": "#0D1117",
-            "icons": [
-              {
-                "src": "icon-192.png",
-                "sizes": "192x192",
-                "type": "image/png"
-              },
-              {
-                "src": "icon-512.png",
-                "sizes": "512x512",
-                "type": "image/png"
-              }
-            ]
-          }
-          EOL
-          echo "✅ Safari manifest added to: $OUTPUT_DIR/manifest.json"
+          echo "🧩 Running safari-web-extension-converter..."
+          mkdir -p /tmp/safari_build
+          xcrun safari-web-extension-converter . \
+            --no-prompt \
+            --force \
+            --project-location /tmp/safari_build
+          echo "✅ Safari project created in /tmp/safari_build"
+          ls -la /tmp/safari_build
+
+      - name: Build Safari extension app
+        script: |
+          echo "🚀 Building Safari extension..."
+          PROJECT=$(find /tmp/safari_build -name "*.xcodeproj" | head -n 1)
+          if [ -z "$PROJECT" ]; then
+            echo "❌ No .xcodeproj found in safari build directory."
+            exit 1
+          fi
+          echo "✅ Found project: $PROJECT"
+
+          echo "🔍 Listing available schemes..."
+          xcodebuild -list -project "$PROJECT"
+
+          SCHEME=$(xcodebuild -list -project "$PROJECT" -json | grep -A 1 '"schemes"' | tail -n 1 | tr -d '", ')
+          if [ -z "$SCHEME" ]; then
+            echo "⚠️ No scheme found, using fallback scheme detection..."
+            SCHEME=$(basename "$PROJECT" .xcodeproj)
+          fi
+
+          echo "✅ Using scheme: $SCHEME"
+
+          xcodebuild \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO | xcpretty
+
+      - name: Package Safari app
+        script: |
+          echo "📦 Packaging Safari app..."
+          mkdir -p $CM_BUILD_DIR/output
+          find /tmp/safari_build -name "*.app" -exec cp -r {} $CM_BUILD_DIR/output/ \;
+          echo "✅ Output packaged successfully."
 
     artifacts:
-      - artifacts/DexScreenerTrader_web_build.zip
+      - output/**
 
     publishing:
       email:
         recipients:
-          - your@email.com
-        notify:
-          success: true
-          failure: true
+          - Tradezconsulting@icloud.com
