@@ -7,16 +7,20 @@
     "default_popup": "popup.html",
     "default_title": "DexScreenerTrader"
   },
-  "permissions": ["storage", "scripting", "activeTab"],
+  "permissions": [
+    "storage",
+    "scripting",
+    "activeTab"
+  ],
   "host_permissions": [
     "https://api.mainnet-beta.solana.com/*",
     "https://api.fluxbeam.xyz/*",
     "https://public-api.fluxbeam.xyz/*"
   ],
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self' https://unpkg.com; object-src 'self'"
