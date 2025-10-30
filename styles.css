@@ -1,1 +1,8 @@
-
+body { font-family: -apple-system, Roboto, Arial; background:#0b0b0b; color:#00ffb2; margin:0; padding:10px; }
+.container { width:360px; }
+h2,h3 { margin:6px 0; text-align:center; }
+input,button { padding:8px; margin:6px 2px; border-radius:6px; border:1px solid #222; }
+button { background:#00ffb2; color:#061010; border:none; cursor:pointer; }
+.message { margin-top:12px; color:#ffd700; word-break:break-word; }
+.send-receive input { width:60%; }
+#walletInfo p { margin:6px 0; }
