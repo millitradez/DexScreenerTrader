@@ -1,97 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DexScreener Trader</title>
-  <style>
-    body {
-      font-family: Inter, Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: #0e1117;
-      color: #fff;
-      width: 340px;
-    }
-    h2 {
-      font-size: 18px;
-      margin-bottom: 8px;
-    }
-    button {
-      background: #00c896;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 16px;
-      cursor: pointer;
-      font-size: 15px;
-      width: 100%;
-      transition: background 0.2s ease-in-out;
-    }
-    button:hover {
-      background: #00e0aa;
-    }
-    .status {
-      margin-top: 10px;
-      font-size: 13px;
-      color: #9ca3af;
-    }
-  </style>
+  <meta charset="utf-8" />
+  <title>DexScreenerTrader v4.5</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="libs/web3.js"></script>
 </head>
 <body>
-  <h2>DexScreener Trader v4.6</h2>
-  <p>Trade directly on DexScreener using Solana + FluxBeam.</p>
-  <button id="connectBtn">Connect Wallet</button>
-  <button id="tradeBtn" style="margin-top:10px;">Execute Trade</button>
-  <div class="status" id="status">Disconnected</div>
+  <div class="container">
+    <h2>DexScreener Trader (v4.5)</h2>
 
-  <script src="libs/web3.js"></script>
-  <script>
-    const connectBtn = document.getElementById('connectBtn');
-    const tradeBtn = document.getElementById('tradeBtn');
-    const statusDiv = document.getElementById('status');
+    <section id="wallet-section">
+      <h3>Wallet</h3>
+      <div id="wallet-controls">
+        <button id="createWalletBtn">🪙 Create Wallet</button>
+        <button id="importWalletBtn">📥 Import (secret key)</button>
+      </div>
 
-    let wallet = null;
+      <div id="unlock" style="margin-top:10px;">
+        <input id="pw" type="password" placeholder="Password to unlock / decrypt" />
+        <button id="unlockBtn">Unlock</button>
+      </div>
 
-    connectBtn.addEventListener('click', async () => {
-      try {
-        if (window.solana && window.solana.isPhantom) {
-          const response = await window.solana.connect();
-          wallet = response.publicKey.toString();
-          statusDiv.textContent = `Connected: ${wallet.slice(0, 6)}...${wallet.slice(-4)}`;
-        } else {
-          statusDiv.textContent = 'Phantom wallet not detected.';
-        }
-      } catch (err) {
-        console.error(err);
-        statusDiv.textContent = 'Connection failed.';
-      }
-    });
+      <div id="walletInfo" style="display:none">
+        <p><strong>Address:</strong> <span id="pubkey"></span></p>
+        <p><strong>SOL Balance:</strong> <span id="balance">—</span></p>
+        <div class="send-receive">
+          <h4>Send / Receive</h4>
+          <div>
+            <input id="toAddr" placeholder="Recipient address" />
+            <input id="sendAmt" placeholder="Amount (SOL)" />
+            <button id="sendSolBtn">Send SOL</button>
+          </div>
+          <div style="margin-top:6px;">
+            <button id="receiveBtn">Receive (copy addr)</button>
+            <button id="showSeedBtn">Show Seed (decrypt)</button>
+            <button id="lockBtn">Lock Wallet</button>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    tradeBtn.addEventListener('click', async () => {
-      if (!wallet) return alert('Please connect wallet first.');
+    <section id="trading-section" style="margin-top:12px;">
+      <h3>Trading / FluxBeam</h3>
+      <input id="inputMint" placeholder="From mint (SOL use So1111...)" />
+      <input id="outputMint" placeholder="To mint (USDC/USDT mint)" />
+      <input id="amount" placeholder="Amount (in token units)" />
+      <div>
+        <button id="quoteBtn">Get Quote</button>
+        <button id="placeOrderBtn">Place Swap</button>
+      </div>
+      <p id="quoteResult"></p>
+      <p id="tradeStatus"></p>
+    </section>
 
-      try {
-        const endpoint = "https://api.fluxbeam.xyz/trade";
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            wallet,
-            action: "buy",
-            token: "SOL",
-            amount: 0.1
-          })
-        });
+    <section id="advanced" style="margin-top:14px;">
+      <label>RPC Endpoint (Mainnet Beta):</label><br />
+      <input id="rpcInput" value="https://api.mainnet-beta.solana.com" />
+      <button id="saveRpcBtn">Save RPC</button>
+    </section>
 
-        const result = await res.json();
-        statusDiv.textContent = `Trade sent: ${result.txSignature || 'pending...'}`;
-      } catch (err) {
-        console.error(err);
-        statusDiv.textContent = 'Trade failed.';
-      }
-    });
-  </script>
+    <div id="message" class="message"></div>
+  </div>
+
+  <script src="wallet.js"></script>
+  <script src="fluxbeam.js"></script>
+  <script src="popup.js"></script>
 </body>
 </html>
-
