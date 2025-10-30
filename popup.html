@@ -1,68 +1,89 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>DexScreenerTrader v4.5</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DexScreener Trader</title>
   <link rel="stylesheet" href="styles.css" />
-  <script src="libs/web3.js"></script>
+  <style>
+    body {
+      width: 340px;
+      min-height: 420px;
+      background-color: #0a0a0a;
+      color: #f2f2f2;
+      font-family: "Inter", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+    }
+    h1 {
+      font-size: 20px;
+      margin-bottom: 12px;
+      text-align: center;
+      color: #00ffa3;
+    }
+    .wallet-section, .trade-section {
+      width: 100%;
+      background: #111;
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 10px;
+      box-shadow: 0 0 8px rgba(0,255,163,0.1);
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 8px;
+      background-color: #00ffa3;
+      color: #000;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      background-color: #00cc82;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      margin-top: 6px;
+      font-size: 14px;
+    }
+    .footer {
+      margin-top: auto;
+      font-size: 12px;
+      opacity: 0.6;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h2>DexScreener Trader (v4.5)</h2>
+  <h1>DexScreener Trader</h1>
 
-    <section id="wallet-section">
-      <h3>Wallet</h3>
-      <div id="wallet-controls">
-        <button id="createWalletBtn">🪙 Create Wallet</button>
-        <button id="importWalletBtn">📥 Import (secret key)</button>
-      </div>
-
-      <div id="unlock" style="margin-top:10px;">
-        <input id="pw" type="password" placeholder="Password to unlock / decrypt" />
-        <button id="unlockBtn">Unlock</button>
-      </div>
-
-      <div id="walletInfo" style="display:none">
-        <p><strong>Address:</strong> <span id="pubkey"></span></p>
-        <p><strong>SOL Balance:</strong> <span id="balance">—</span></p>
-        <div class="send-receive">
-          <h4>Send / Receive</h4>
-          <div>
-            <input id="toAddr" placeholder="Recipient address" />
-            <input id="sendAmt" placeholder="Amount (SOL)" />
-            <button id="sendSolBtn">Send SOL</button>
-          </div>
-          <div style="margin-top:6px;">
-            <button id="receiveBtn">Receive (copy addr)</button>
-            <button id="showSeedBtn">Show Seed (decrypt)</button>
-            <button id="lockBtn">Lock Wallet</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="trading-section" style="margin-top:12px;">
-      <h3>Trading / FluxBeam</h3>
-      <input id="inputMint" placeholder="From mint (SOL use So1111...)" />
-      <input id="outputMint" placeholder="To mint (USDC/USDT mint)" />
-      <input id="amount" placeholder="Amount (in token units)" />
-      <div>
-        <button id="quoteBtn">Get Quote</button>
-        <button id="placeOrderBtn">Place Swap</button>
-      </div>
-      <p id="quoteResult"></p>
-      <p id="tradeStatus"></p>
-    </section>
-
-    <section id="advanced" style="margin-top:14px;">
-      <label>RPC Endpoint (Mainnet Beta):</label><br />
-      <input id="rpcInput" value="https://api.mainnet-beta.solana.com" />
-      <button id="saveRpcBtn">Save RPC</button>
-    </section>
-
-    <div id="message" class="message"></div>
+  <div class="wallet-section">
+    <h2>Wallet</h2>
+    <p id="walletAddress">Not connected</p>
+    <button id="connectWallet">Connect Wallet</button>
   </div>
 
+  <div class="trade-section">
+    <h2>Trade</h2>
+    <input type="text" id="tokenAddress" placeholder="Enter token address..." />
+    <input type="number" id="amount" placeholder="Amount (SOL)" />
+    <button id="tradeBtn">Execute Trade</button>
+  </div>
+
+  <div class="footer">
+    <p>Powered by Fluxbeam API + Solana Web3.js</p>
+  </div>
+
+  <!-- Scripts -->
+  <script src="libs/web3.min.js"></script>
   <script src="wallet.js"></script>
   <script src="fluxbeam.js"></script>
   <script src="popup.js"></script>
