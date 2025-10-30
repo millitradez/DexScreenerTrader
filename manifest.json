@@ -2,16 +2,12 @@
   "manifest_version": 3,
   "name": "DexScreenerTrader",
   "version": "4.5",
-  "description": "DexScreenerTrader v4.5 — Embedded Solana wallet and FluxBeam trading integration.",
+  "description": "DexScreenerTrader v4.5 — embedded wallet, SOL & SPL, FluxBeam trade (Mainnet Beta).",
   "action": {
     "default_popup": "popup.html",
     "default_title": "DexScreenerTrader"
   },
-  "permissions": [
-    "storage",
-    "scripting",
-    "activeTab"
-  ],
+  "permissions": ["storage", "scripting", "activeTab"],
   "host_permissions": [
     "https://api.mainnet-beta.solana.com/*",
     "https://api.fluxbeam.xyz/*",
@@ -24,11 +20,5 @@
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
-  },
-  "web_accessible_resources": [
-    {
-      "resources": ["libs/web3.js"],
-      "matches": ["<all_urls>"]
-    }
-  ]
+  }
 }
