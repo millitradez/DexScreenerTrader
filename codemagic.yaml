@@ -65,10 +65,16 @@ workflows:
           echo "📦 Packaging Safari app..."
           mkdir -p $CM_BUILD_DIR/output
           find /tmp/safari_build -name "*.app" -exec cp -r {} $CM_BUILD_DIR/output/ \;
-          echo "✅ Output packaged successfully."
+
+          echo "🗜️ Creating .zip bundle..."
+          cd $CM_BUILD_DIR/output
+          zip -r Safari_Extension_Build.zip ./*
+          echo "✅ Output packaged successfully at $CM_BUILD_DIR/output/Safari_Extension_Build.zip"
 
     artifacts:
       - output/**
+      - /tmp/safari_build/**/*.xcodeproj
+      - /tmp/safari_build/**/*.app
 
     publishing:
       email:
