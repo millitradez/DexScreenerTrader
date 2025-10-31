@@ -71,6 +71,10 @@ const Wallet = (function () {
 
   // create wallet, return pubkey
   async function createWallet(password) {
+    if (!password || password.length < 8) {
+      throw new Error('Password must be at least 8 characters long');
+    }
+    
     const kp = solanaWeb3.Keypair.generate();
     const seed = kp.secretKey; // Uint8Array
     const enc = await encryptSeed(seed, password);
@@ -81,14 +85,31 @@ const Wallet = (function () {
 
   // import secretKey: accepts base58 or JSON array
   async function importWallet(secretKeyInput, password) {
+    if (!secretKeyInput || secretKeyInput.trim() === '') {
+      throw new Error('Secret key is required');
+    }
+    
     let secret;
     try {
-      secret = base58.decode(secretKeyInput);
+      // Try base58 first
+      secret = base58.decode(secretKeyInput.trim());
     } catch (e) {
-      // try JSON array
-      const arr = JSON.parse(secretKeyInput);
-      secret = new Uint8Array(arr);
+      try {
+        // Try JSON array
+        const arr = JSON.parse(secretKeyInput);
+        if (!Array.isArray(arr)) {
+          throw new Error('Invalid secret key format');
+        }
+        secret = new Uint8Array(arr);
+      } catch (jsonError) {
+        throw new Error('Invalid secret key format. Must be base58 string or JSON array.');
+      }
     }
+    
+    if (secret.length !== 64) {
+      throw new Error('Invalid secret key length. Expected 64 bytes.');
+    }
+    
     const enc = await encryptSeed(secret, password);
     const kp = solanaWeb3.Keypair.fromSecretKey(new Uint8Array(secret));
     const payload = { enc, pubkey: kp.publicKey.toBase58() };
@@ -98,13 +119,28 @@ const Wallet = (function () {
 
   // unlock returns {kp, conn}
   async function unlock(password) {
+    if (!password) {
+      throw new Error('Password is required');
+    }
+    
     const stored = await loadStored();
-    if (!stored) throw new Error('No wallet found');
-    const seed = await decryptSeed(stored.enc, password);
-    const kp = solanaWeb3.Keypair.fromSecretKey(new Uint8Array(seed));
-    const rpc = await loadRpc();
-    const conn = new solanaWeb3.Connection(rpc, 'confirmed');
-    return { kp, conn, pubkey: kp.publicKey.toBase58() };
+    if (!stored) {
+      throw new Error('No wallet found. Please create or import a wallet first.');
+    }
+    
+    if (!stored.enc) {
+      throw new Error('Wallet data is corrupted. Missing encryption data.');
+    }
+    
+    try {
+      const seed = await decryptSeed(stored.enc, password);
+      const kp = solanaWeb3.Keypair.fromSecretKey(new Uint8Array(seed));
+      const rpc = await loadRpc();
+      const conn = new solanaWeb3.Connection(rpc, 'confirmed');
+      return { kp, conn, pubkey: kp.publicKey.toBase58() };
+    } catch (error) {
+      throw new Error('Failed to unlock wallet. Incorrect password or corrupted data.');
+    }
   }
 
   async function getBalance(pubkey, conn) {

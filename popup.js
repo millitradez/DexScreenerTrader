@@ -5,29 +5,72 @@ document.addEventListener("DOMContentLoaded", async () => {
   const tokenInput = document.getElementById("tokenAddress");
   const amountInput = document.getElementById("amount");
 
-  let wallet = null;
+  let walletData = null;
 
-  // ✅ Connect Wallet button
+  // Check if wallet exists on load
+  try {
+    const stored = await new Promise((resolve) => {
+      chrome.storage.local.get(['dst_wallet_v4'], (items) => {
+        resolve(items['dst_wallet_v4']);
+      });
+    });
+    
+    if (stored && stored.pubkey) {
+      walletData = stored;
+      walletAddressEl.textContent = `Wallet: ${stored.pubkey.slice(0, 6)}...${stored.pubkey.slice(-4)}`;
+      connectBtn.textContent = "Wallet Loaded ✅";
+      connectBtn.disabled = true;
+    }
+  } catch (err) {
+    console.error("Error checking wallet:", err);
+  }
+
+  // Connect/Create Wallet button
   connectBtn.addEventListener("click", async () => {
     try {
-      if (!window.solana) {
-        alert("No Solana wallet detected. Please install Phantom.");
+      const password = prompt("Enter a password to create/unlock your wallet:");
+      if (!password) {
         return;
       }
 
-      const response = await window.solana.connect();
-      wallet = response.publicKey.toString();
-      walletAddressEl.textContent = `Connected: ${wallet.slice(0, 6)}...${wallet.slice(-4)}`;
-      connectBtn.textContent = "Connected ✅";
+      // Check if wallet exists
+      const stored = await new Promise((resolve) => {
+        chrome.storage.local.get(['dst_wallet_v4'], (items) => {
+          resolve(items['dst_wallet_v4']);
+        });
+      });
+
+      if (stored && stored.enc) {
+        // Unlock existing wallet
+        try {
+          const unlocked = await Wallet.unlock(password);
+          walletData = { pubkey: unlocked.pubkey };
+          walletAddressEl.textContent = `Connected: ${unlocked.pubkey.slice(0, 6)}...${unlocked.pubkey.slice(-4)}`;
+          connectBtn.textContent = "Connected ✅";
+          connectBtn.disabled = true;
+          alert("Wallet unlocked successfully!");
+        } catch (err) {
+          console.error("Unlock error:", err);
+          alert("Failed to unlock wallet. Incorrect password?");
+        }
+      } else {
+        // Create new wallet
+        const created = await Wallet.createWallet(password);
+        walletData = created;
+        walletAddressEl.textContent = `Created: ${created.pubkey.slice(0, 6)}...${created.pubkey.slice(-4)}`;
+        connectBtn.textContent = "Wallet Created ✅";
+        connectBtn.disabled = true;
+        alert("New wallet created! Please save your private key securely.");
+      }
     } catch (err) {
       console.error("Wallet connection error:", err);
-      alert("Failed to connect wallet.");
+      alert("Failed to connect/create wallet: " + err.message);
     }
   });
 
-  // ✅ Execute Trade button
+  // Execute Trade button
   tradeBtn.addEventListener("click", async () => {
-    if (!wallet) {
+    if (!walletData || !walletData.pubkey) {
       alert("Please connect your wallet first.");
       return;
     }
@@ -41,11 +84,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
+      const password = prompt("Enter your wallet password to execute trade:");
+      if (!password) {
+        return;
+      }
+
+      // Unlock wallet to get keypair
+      const unlocked = await Wallet.unlock(password);
       console.log(`Trading ${amount} SOL for token: ${tokenAddress}`);
-      alert(`Trade executed! (mock for now)`);
+      
+      // Get balance to verify
+      const balance = await Wallet.getBalance(unlocked.pubkey, unlocked.conn);
+      console.log(`Current balance: ${balance} SOL`);
+      
+      if (balance < amount) {
+        alert(`Insufficient balance. You have ${balance} SOL but need ${amount} SOL.`);
+        return;
+      }
+
+      alert(`Trade prepared! Balance: ${balance} SOL\n(Actual swap execution requires Fluxbeam API integration)`);
     } catch (err) {
       console.error("Trade error:", err);
-      alert("Trade failed. Check console for details.");
+      alert("Trade failed: " + err.message);
     }
   });
 
