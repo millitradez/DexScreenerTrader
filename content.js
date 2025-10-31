@@ -1,9 +1,12 @@
 
-
 // content.js
 function injectRorkModal() {
-  if (document.getElementById("rork-modal")) return;
+  if (document.getElementById("rork-modal")) {
+    console.log("Rork modal already exists, skipping injection");
+    return;
+  }
 
+  console.log("Injecting Rork modal into page");
   const modal = document.createElement("div");
   modal.id = "rork-modal";
   modal.innerHTML = `
@@ -17,27 +20,48 @@ function injectRorkModal() {
     </div>
   `;
   document.body.appendChild(modal);
+  console.log("Rork modal injected successfully");
 
-  // Add event listeners
+  // Helper function to handle message sending with proper error handling
+  function sendMessageToBackground(action, additionalData = {}) {
+    console.log(`${action} button clicked`);
+    chrome.runtime.sendMessage({ action, ...additionalData }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error("Error sending message:", chrome.runtime.lastError);
+        alert("Error communicating with extension: " + chrome.runtime.lastError.message);
+      } else if (!response) {
+        console.error("No response received from service worker");
+        alert("No response from extension service worker");
+      } else {
+        console.log("Response from service worker:", response);
+        alert(response.message || `${action} initiated`);
+      }
+    });
+  }
+
+  // Add event listeners with proper error handling
   document.getElementById("loadWallet").addEventListener("click", () => {
     const pk = document.getElementById("privateKey").value.trim();
-    chrome.runtime.sendMessage({ action: "loadWallet", pk });
+    sendMessageToBackground("loadWallet", { pk });
   });
 
   document.getElementById("encryptWallet").addEventListener("click", () => {
-    chrome.runtime.sendMessage({ action: "encryptWallet" });
+    sendMessageToBackground("encryptWallet");
   });
 
   document.getElementById("buyToken").addEventListener("click", () => {
-    chrome.runtime.sendMessage({ action: "buyToken" });
+    sendMessageToBackground("buyToken");
   });
 
   document.getElementById("sellToken").addEventListener("click", () => {
-    chrome.runtime.sendMessage({ action: "sellToken" });
+    sendMessageToBackground("sellToken");
   });
 }
 
 // Inject when Dexscreener loads
 if (window.location.href.includes("dexscreener.com")) {
+  console.log("DexScreener detected, injecting modal");
   injectRorkModal();
+} else {
+  console.log("Not on DexScreener, current URL:", window.location.href);
 }
