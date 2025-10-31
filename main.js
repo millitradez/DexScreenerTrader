@@ -6,7 +6,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   
   switch (message.action) {
     case "loadWallet":
-      console.log("Loading wallet with PK:", message.pk);
+      console.log("Loading wallet (PK length:", message.pk?.length || 0, "characters)");
       // call Jupiter / Rork logic here
       sendResponse({ success: true, message: "Wallet load initiated" });
       break;

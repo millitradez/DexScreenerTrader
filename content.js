@@ -22,58 +22,39 @@ function injectRorkModal() {
   document.body.appendChild(modal);
   console.log("Rork modal injected successfully");
 
+  // Helper function to handle message sending with proper error handling
+  function sendMessageToBackground(action, additionalData = {}) {
+    console.log(`${action} button clicked`);
+    chrome.runtime.sendMessage({ action, ...additionalData }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error("Error sending message:", chrome.runtime.lastError);
+        alert("Error communicating with extension: " + chrome.runtime.lastError.message);
+      } else if (!response) {
+        console.error("No response received from service worker");
+        alert("No response from extension service worker");
+      } else {
+        console.log("Response from service worker:", response);
+        alert(response.message || `${action} initiated`);
+      }
+    });
+  }
+
   // Add event listeners with proper error handling
   document.getElementById("loadWallet").addEventListener("click", () => {
     const pk = document.getElementById("privateKey").value.trim();
-    console.log("Load wallet button clicked");
-    chrome.runtime.sendMessage({ action: "loadWallet", pk }, (response) => {
-      if (chrome.runtime.lastError) {
-        console.error("Error sending message:", chrome.runtime.lastError);
-        alert("Error communicating with extension: " + chrome.runtime.lastError.message);
-      } else {
-        console.log("Response from service worker:", response);
-        alert(response.message || "Wallet load initiated");
-      }
-    });
+    sendMessageToBackground("loadWallet", { pk });
   });
 
   document.getElementById("encryptWallet").addEventListener("click", () => {
-    console.log("Encrypt wallet button clicked");
-    chrome.runtime.sendMessage({ action: "encryptWallet" }, (response) => {
-      if (chrome.runtime.lastError) {
-        console.error("Error sending message:", chrome.runtime.lastError);
-        alert("Error communicating with extension: " + chrome.runtime.lastError.message);
-      } else {
-        console.log("Response from service worker:", response);
-        alert(response.message || "Wallet encryption initiated");
-      }
-    });
+    sendMessageToBackground("encryptWallet");
   });
 
   document.getElementById("buyToken").addEventListener("click", () => {
-    console.log("Buy token button clicked");
-    chrome.runtime.sendMessage({ action: "buyToken" }, (response) => {
-      if (chrome.runtime.lastError) {
-        console.error("Error sending message:", chrome.runtime.lastError);
-        alert("Error communicating with extension: " + chrome.runtime.lastError.message);
-      } else {
-        console.log("Response from service worker:", response);
-        alert(response.message || "Buy token initiated");
-      }
-    });
+    sendMessageToBackground("buyToken");
   });
 
   document.getElementById("sellToken").addEventListener("click", () => {
-    console.log("Sell token button clicked");
-    chrome.runtime.sendMessage({ action: "sellToken" }, (response) => {
-      if (chrome.runtime.lastError) {
-        console.error("Error sending message:", chrome.runtime.lastError);
-        alert("Error communicating with extension: " + chrome.runtime.lastError.message);
-      } else {
-        console.log("Response from service worker:", response);
-        alert(response.message || "Sell token initiated");
-      }
-    });
+    sendMessageToBackground("sellToken");
   });
 }
 
