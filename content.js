@@ -1,9 +1,12 @@
 
-
 // content.js
 function injectRorkModal() {
-  if (document.getElementById("rork-modal")) return;
+  if (document.getElementById("rork-modal")) {
+    console.log("Rork modal already exists, skipping injection");
+    return;
+  }
 
+  console.log("Injecting Rork modal into page");
   const modal = document.createElement("div");
   modal.id = "rork-modal";
   modal.innerHTML = `
@@ -17,27 +20,67 @@ function injectRorkModal() {
     </div>
   `;
   document.body.appendChild(modal);
+  console.log("Rork modal injected successfully");
 
-  // Add event listeners
+  // Add event listeners with proper error handling
   document.getElementById("loadWallet").addEventListener("click", () => {
     const pk = document.getElementById("privateKey").value.trim();
-    chrome.runtime.sendMessage({ action: "loadWallet", pk });
+    console.log("Load wallet button clicked");
+    chrome.runtime.sendMessage({ action: "loadWallet", pk }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error("Error sending message:", chrome.runtime.lastError);
+        alert("Error communicating with extension: " + chrome.runtime.lastError.message);
+      } else {
+        console.log("Response from service worker:", response);
+        alert(response.message || "Wallet load initiated");
+      }
+    });
   });
 
   document.getElementById("encryptWallet").addEventListener("click", () => {
-    chrome.runtime.sendMessage({ action: "encryptWallet" });
+    console.log("Encrypt wallet button clicked");
+    chrome.runtime.sendMessage({ action: "encryptWallet" }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error("Error sending message:", chrome.runtime.lastError);
+        alert("Error communicating with extension: " + chrome.runtime.lastError.message);
+      } else {
+        console.log("Response from service worker:", response);
+        alert(response.message || "Wallet encryption initiated");
+      }
+    });
   });
 
   document.getElementById("buyToken").addEventListener("click", () => {
-    chrome.runtime.sendMessage({ action: "buyToken" });
+    console.log("Buy token button clicked");
+    chrome.runtime.sendMessage({ action: "buyToken" }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error("Error sending message:", chrome.runtime.lastError);
+        alert("Error communicating with extension: " + chrome.runtime.lastError.message);
+      } else {
+        console.log("Response from service worker:", response);
+        alert(response.message || "Buy token initiated");
+      }
+    });
   });
 
   document.getElementById("sellToken").addEventListener("click", () => {
-    chrome.runtime.sendMessage({ action: "sellToken" });
+    console.log("Sell token button clicked");
+    chrome.runtime.sendMessage({ action: "sellToken" }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error("Error sending message:", chrome.runtime.lastError);
+        alert("Error communicating with extension: " + chrome.runtime.lastError.message);
+      } else {
+        console.log("Response from service worker:", response);
+        alert(response.message || "Sell token initiated");
+      }
+    });
   });
 }
 
 // Inject when Dexscreener loads
 if (window.location.href.includes("dexscreener.com")) {
+  console.log("DexScreener detected, injecting modal");
   injectRorkModal();
+} else {
+  console.log("Not on DexScreener, current URL:", window.location.href);
 }
