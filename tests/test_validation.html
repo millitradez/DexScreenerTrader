@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Validation Tests</title>
+  <script src="../popup.js"></script>
+</head>
+<body>
+  <h1>Validation Logic Test Suite</h1>
+  <div id="results"></div>
+
+  <script>
+    const resultsDiv = document.getElementById('results');
+    let failures = 0;
+
+    function assert(value, description) {
+      const li = document.createElement('li');
+      li.style.color = value ? 'green' : 'red';
+      li.textContent = `${description}: ${value ? 'PASSED' : 'FAILED'}`;
+      resultsDiv.appendChild(li);
+      if (!value) {
+        failures++;
+      }
+    }
+
+    // --- Test Cases ---
+
+    // 1. Valid inputs
+    assert(isValidTradeInput('test-token', '1.5'), 'Should return true for valid inputs');
+    assert(isValidTradeInput('test-token', '1'), 'Should return true for integer inputs');
+    assert(isValidTradeInput('test-token', '0.5'), 'Should return true for decimal inputs');
+
+    // 2. Invalid inputs (the bug)
+    assert(!isValidTradeInput('test-token', '1.5 SOL'), 'Should return false for amount with trailing characters');
+    assert(!isValidTradeInput('test-token', 'abc'), 'Should return false for non-numeric amount');
+    assert(!isValidTradeInput('test-token', ''), 'Should return false for empty amount');
+    assert(!isValidTradeInput('', '1.5'), 'Should return false for empty token address');
+    assert(!isValidTradeInput('test-token', '0'), 'Should return false for zero amount');
+    assert(!isValidTradeInput('test-token', '-1'), 'Should return false for negative amount');
+
+
+    // --- Summary ---
+    const summary = document.createElement('h2');
+    if (failures === 0) {
+      summary.style.color = 'green';
+      summary.textContent = 'All tests passed!';
+    } else {
+      summary.style.color = 'red';
+      summary.textContent = `${failures} test(s) failed.`;
+    }
+    resultsDiv.appendChild(summary);
+  </script>
+</body>
+</html>

@@ -1,3 +1,11 @@
+function isValidTradeInput(tokenAddress, amountValue) {
+  const amountRegex = /^[0-9]*\.?[0-9]+$/;
+  if (!tokenAddress || !amountRegex.test(amountValue) || parseFloat(amountValue) <= 0) {
+    return false;
+  }
+  return true;
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   const connectBtn = document.getElementById("connectWallet");
   const walletAddressEl = document.getElementById("walletAddress");
@@ -33,12 +41,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const tokenAddress = tokenInput.value.trim();
-    const amount = parseFloat(amountInput.value);
+    const amountValue = amountInput.value.trim();
 
-    if (!tokenAddress || isNaN(amount) || amount <= 0) {
+    if (!isValidTradeInput(tokenAddress, amountValue)) {
       alert("Please enter a valid token address and amount.");
       return;
     }
+
+    const amount = parseFloat(amountValue);
 
     try {
       console.log(`Trading ${amount} SOL for token: ${tokenAddress}`);
