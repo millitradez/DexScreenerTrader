@@ -25,14 +25,14 @@ async function handleLoadWallet(pk) {
   try {
     if (!pk) {
       // Generate new wallet
-      const password = "temp_password"; // In production, should prompt user
-      // For now, just log that we would create a wallet
-      console.log("Would create new wallet with password");
-      return { success: true, message: "Wallet generation initiated" };
+      // Note: In production, user should create wallet through popup UI with password
+      console.log("Wallet generation should be done through popup UI with password protection");
+      return { success: false, message: "Please use the extension popup to create a wallet" };
     } else {
       // Import wallet from private key
-      console.log("Would import wallet from private key");
-      return { success: true, message: "Wallet import initiated" };
+      // Note: In production, this would require password input from user
+      console.log("Wallet import should be done through popup UI with password protection");
+      return { success: false, message: "Please use the extension popup to import a wallet" };
     }
   } catch (error) {
     console.error("Load wallet error:", error);

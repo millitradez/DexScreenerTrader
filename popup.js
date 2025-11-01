@@ -28,6 +28,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Connect/Create Wallet button
   connectBtn.addEventListener("click", async () => {
     try {
+      // TODO: Replace prompt() with proper password dialog
+      // Current implementation uses prompt() which is not ideal for passwords as:
+      // - Password is visible while typing
+      // - May be logged in browser history
+      // Consider creating a modal with <input type="password"> for production use
       const password = prompt("Enter a password to create/unlock your wallet:");
       if (!password) {
         return;
@@ -84,6 +89,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
+      // TODO: Replace prompt() with proper password dialog (see comment above connectBtn)
       const password = prompt("Enter your wallet password to execute trade:");
       if (!password) {
         return;

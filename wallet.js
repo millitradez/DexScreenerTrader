@@ -71,6 +71,9 @@ const Wallet = (function () {
 
   // create wallet, return pubkey
   async function createWallet(password) {
+    // TODO: Add password complexity requirements for better security
+    // Current validation only checks length (minimum 8 characters)
+    // Consider adding: uppercase, lowercase, numbers, special characters
     if (!password || password.length < 8) {
       throw new Error('Password must be at least 8 characters long');
     }
