@@ -25,8 +25,15 @@
     "https://dexscreener.com/*",
     "https://api.dexscreener.com/*"
   ],
+  "content_scripts": [
+    {
+      "matches": ["https://dexscreener.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
   "background": {
-    "service_worker": "main.js"
+    "service_worker": "background.js"
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
