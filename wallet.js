@@ -114,7 +114,7 @@ const Wallet = (function () {
     }
     
     const enc = await encryptSeed(secret, password);
-    const kp = solanaWeb3.Keypair.fromSecretKey(new Uint8Array(secret));
+    const kp = solanaWeb3.Keypair.fromSecretKey(secret);
     const payload = { enc, pubkey: kp.publicKey.toBase58() };
     await store(payload);
     return payload;

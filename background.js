@@ -25,14 +25,16 @@ async function handleLoadWallet(pk) {
   try {
     if (!pk) {
       // Generate new wallet
-      // Note: In production, user should create wallet through popup UI with password
+      // Note: Wallet creation is restricted to popup UI for security
+      // This ensures password is collected securely and not exposed in content script context
       console.log("Wallet generation should be done through popup UI with password protection");
-      return { success: false, message: "Please use the extension popup to create a wallet" };
+      return { success: false, message: "For security, please use the extension popup to create a wallet with password protection" };
     } else {
       // Import wallet from private key
-      // Note: In production, this would require password input from user
+      // Note: Wallet import is restricted to popup UI for security
+      // This protects the private key from exposure in content script context
       console.log("Wallet import should be done through popup UI with password protection");
-      return { success: false, message: "Please use the extension popup to import a wallet" };
+      return { success: false, message: "For security, please use the extension popup to import your wallet" };
     }
   } catch (error) {
     console.error("Load wallet error:", error);
