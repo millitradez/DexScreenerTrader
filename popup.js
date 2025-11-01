@@ -18,16 +18,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'));
 
-  // Auto-load wallet from storage if it exists
-  const password = localStorage.getItem("password");
-  if (password) {
-    passwordInput.value = password;
-    embeddedWallet.loadAndDecryptWallet(password);
-    const publicKey = embeddedWallet.getPublicKey();
-    if (publicKey) {
-      walletAddressEl.textContent = `Loaded: ${publicKey.slice(0, 6)}...${publicKey.slice(-4)}`;
-    }
-  }
 
   // ✅ Load / Generate Wallet button
   loadWalletBtn.addEventListener("click", async () => {
@@ -53,7 +43,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
     embeddedWallet.encryptAndSaveWallet(password);
-    localStorage.setItem("password", password);
     alert("Wallet encrypted and saved.");
   });
 
