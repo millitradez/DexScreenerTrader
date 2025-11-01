@@ -66,9 +66,12 @@
   <h1>DexScreener Trader</h1>
 
   <div class="wallet-section">
-    <h2>Wallet</h2>
-    <p id="walletAddress">Not connected</p>
-    <button id="connectWallet">Connect Wallet</button>
+    <h2>Embedded Wallet</h2>
+    <p id="walletAddress">No wallet loaded</p>
+    <input type="password" id="privateKey" placeholder="Enter private key (optional)" />
+    <input type="password" id="password" placeholder="Enter password" />
+    <button id="loadWallet">Load / Generate Wallet</button>
+    <button id="encryptWallet">Encrypt & Save Wallet</button>
   </div>
 
   <div class="trade-section">
@@ -84,7 +87,9 @@
 
   <!-- Scripts -->
   <script src="libs/web3.min.js"></script>
+  <script src="libs/crypto-js.js"></script>
   <script src="wallet.js"></script>
+  <script src="embedded_wallet.js"></script>
   <script src="fluxbeam.js"></script>
   <script src="popup.js"></script>
 </body>
