@@ -29,7 +29,8 @@ const embeddedWallet = {
       return;
     }
     const privateKey = this.keypair.secretKey;
-    const encrypted = CryptoJS.AES.encrypt(privateKey.toString(), password).toString();
+    const encoded = this.bs58.encode(privateKey);
+    const encrypted = CryptoJS.AES.encrypt(encoded, password).toString();
     localStorage.setItem("encryptedWallet", encrypted);
     console.log("Wallet saved and encrypted.");
   },
@@ -43,7 +44,8 @@ const embeddedWallet = {
     }
     try {
       const decrypted = CryptoJS.AES.decrypt(encrypted, password);
-      const privateKey = new Uint8Array(decrypted.toString(CryptoJS.enc.Utf8).split(','));
+      const encoded = decrypted.toString(CryptoJS.enc.Utf8);
+      const privateKey = this.bs58.decode(encoded);
       this.keypair = solanaWeb3.Keypair.fromSecretKey(privateKey);
       console.log("Wallet loaded and decrypted.");
     } catch (e) {
@@ -60,6 +62,35 @@ const embeddedWallet = {
   bs58: {
     alphabet: '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz',
     base: 58,
+    encode: function(source) {
+        if (source.length === 0) return ''
+
+        var digits = [0]
+        for (var i = 0; i < source.length; i++) {
+            for (var j = 0, carry = source[i]; j < digits.length; j++) {
+                carry += digits[j] << 8
+                digits[j] = carry % this.base
+                carry = (carry / this.base) | 0
+            }
+
+            while (carry > 0) {
+                digits.push(carry % this.base)
+                carry = (carry / this.base) | 0
+            }
+        }
+
+        var string = ''
+        // deal with leading zeros
+        for (var k = 0; source[k] === 0 && k < source.length - 1; k++) {
+            string += '1'
+        }
+        // convert digits to a string
+        for (var q = digits.length - 1; q >= 0; q--) {
+            string += this.alphabet[digits[q]]
+        }
+
+        return string
+    },
     decode: function(string) {
       if (string.length === 0) return new Uint8Array(0)
 

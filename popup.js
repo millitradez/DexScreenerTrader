@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
 
       // 3. Sign and send the transaction
-      const transactionBuffer = Buffer.from(base64Transaction, 'base64');
+      const transactionBuffer = buffer.Buffer.from(base64Transaction, 'base64');
       const transaction = solanaWeb3.Transaction.from(transactionBuffer);
 
       transaction.partialSign(wallet.keypair);
